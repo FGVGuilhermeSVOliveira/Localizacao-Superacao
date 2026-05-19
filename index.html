@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0d1117" />
+  <title>Minha Localização</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d1117;
+      --surface:   #161b22;
+      --accent:    #00ffe0;
+      --accent2:   #ff4d6d;
+      --text:      #e6edf3;
+      --muted:     #8b949e;
+      --radius:    16px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      overflow: hidden;
+    }
+
+    /* ── Layout ── */
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+    }
+
+    /* ── Hero panel ── */
+    #hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      padding: 32px 24px;
+      position: relative;
+      transition: flex 0.55s cubic-bezier(0.77,0,0.18,1);
+    }
+    #hero.shrink { flex: 0 0 200px; }
+
+    /* background grid */
+    #hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,255,224,.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,224,.06) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+
+    #title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.6rem, 8vw, 2.4rem);
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: var(--text);
+      text-align: center;
+      line-height: 1.1;
+    }
+    #title span { color: var(--accent); }
+
+    #subtitle {
+      font-size: .72rem;
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    /* ── Button ── */
+    #btn-locate {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: transparent;
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      font-family: 'Space Mono', monospace;
+      font-size: .9rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 18px 36px;
+      border-radius: 999px;
+      cursor: pointer;
+      overflow: hidden;
+      transition: color .3s, background .3s, transform .15s, box-shadow .3s;
+      box-shadow: 0 0 24px rgba(0,255,224,.18);
+    }
+    #btn-locate::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: var(--accent);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .35s cubic-bezier(0.77,0,0.18,1);
+      z-index: 0;
+    }
+    #btn-locate:hover::before, #btn-locate.active::before { transform: scaleX(1); }
+    #btn-locate:hover, #btn-locate.active { color: #0d1117; box-shadow: 0 0 40px rgba(0,255,224,.55); }
+    #btn-locate:active { transform: scale(0.96); }
+    #btn-locate > * { position: relative; z-index: 1; }
+
+    .btn-icon { width: 22px; height: 22px; }
+
+    /* ── Info bar ── */
+    #info {
+      font-size: .7rem;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-align: center;
+      min-height: 20px;
+      padding: 0 16px;
+    }
+    #info.error { color: var(--accent2); }
+
+    /* ── Map panel ── */
+    #map-panel {
+      flex: 0 0 0;
+      overflow: hidden;
+      transition: flex 0.55s cubic-bezier(0.77,0,0.18,1);
+      border-top: 2px solid rgba(0,255,224,.2);
+    }
+    #map-panel.open {
+      flex: 1 1 0;
+    }
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ── Leaflet overrides ── */
+    .leaflet-container { background: #0d1117; }
+    .leaflet-tile { filter: brightness(.85) saturate(.6) hue-rotate(170deg); }
+
+    /* custom pulse marker */
+    .pulse-wrapper {
+      position: relative;
+      width: 24px;
+      height: 24px;
+    }
+    .pulse-dot {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 14px; height: 14px;
+      background: var(--accent);
+      border-radius: 50%;
+      border: 2px solid #fff;
+      box-shadow: 0 0 10px var(--accent);
+      z-index: 2;
+    }
+    .pulse-ring {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 14px; height: 14px;
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+      animation: pulse-out 1.8s ease-out infinite;
+    }
+    @keyframes pulse-out {
+      0%   { width:14px; height:14px; opacity:.9; }
+      100% { width:56px; height:56px; opacity:0; }
+    }
+
+    /* loading spinner inside button */
+    .spinner {
+      display: none;
+      width: 20px; height: 20px;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    .loading .spinner { display: block; }
+    .loading .btn-icon { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* coords chip */
+    #coords {
+      display: none;
+      font-size: .65rem;
+      background: rgba(0,255,224,.1);
+      border: 1px solid rgba(0,255,224,.3);
+      color: var(--accent);
+      padding: 6px 14px;
+      border-radius: 999px;
+      letter-spacing: 1px;
+    }
+    #coords.visible { display: inline-block; }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Hero -->
+  <div id="hero">
+    <div>
+      <div id="title">Onde<br/>estou<span>?</span></div>
+      <div id="subtitle" style="margin-top:8px">GPS · Mapa ao vivo</div>
+    </div>
+
+    <button id="btn-locate" onclick="locateMe()">
+      <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/>
+        <circle cx="12" cy="12" r="9" opacity=".35"/>
+      </svg>
+      <div class="spinner"></div>
+      <span id="btn-text">Ver minha localização</span>
+    </button>
+
+    <div id="coords"></div>
+    <div id="info">Toque no botão para abrir o mapa</div>
+  </div>
+
+  <!-- Map -->
+  <div id="map-panel">
+    <div id="map"></div>
+  </div>
+
+</div>
+
+<script>
+  let map = null;
+  let marker = null;
+  let mapReady = false;
+
+  function locateMe() {
+    const btn = document.getElementById('btn-locate');
+    const info = document.getElementById('info');
+    const btnText = document.getElementById('btn-text');
+
+    if (!navigator.geolocation) {
+      info.textContent = 'GPS não disponível neste dispositivo.';
+      info.className = 'error';
+      return;
+    }
+
+    // loading state
+    btn.classList.add('loading', 'active');
+    btnText.textContent = 'Obtendo GPS…';
+    info.className = '';
+    info.textContent = 'Aguardando permissão de localização…';
+
+    navigator.geolocation.getCurrentPosition(
+      onSuccess,
+      onError,
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+  }
+
+  function onSuccess(pos) {
+    const lat = pos.coords.latitude;
+    const lon = pos.coords.longitude;
+    const acc = Math.round(pos.coords.accuracy);
+
+    // reset button
+    const btn = document.getElementById('btn-locate');
+    btn.classList.remove('loading');
+    btn.classList.add('active');
+    document.getElementById('btn-text').textContent = 'Atualizar';
+
+    // show coords chip
+    const coords = document.getElementById('coords');
+    coords.textContent = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+    coords.classList.add('visible');
+
+    document.getElementById('info').textContent = `Precisão: ±${acc} m`;
+    document.getElementById('info').className = '';
+
+    // open map panel
+    document.getElementById('hero').classList.add('shrink');
+    const panel = document.getElementById('map-panel');
+    panel.classList.add('open');
+
+    // init map once
+    if (!mapReady) {
+      mapReady = true;
+      setTimeout(() => {
+        map = L.map('map', { zoomControl: true, attributionControl: false });
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19
+        }).addTo(map);
+
+        // custom icon
+        const icon = L.divIcon({
+          className: '',
+          html: '<div class="pulse-wrapper"><div class="pulse-ring"></div><div class="pulse-dot"></div></div>',
+          iconSize: [24, 24],
+          iconAnchor: [12, 12]
+        });
+
+        marker = L.marker([lat, lon], { icon }).addTo(map);
+        map.setView([lat, lon], 16);
+      }, 380); // wait for panel transition
+    } else {
+      // update position
+      marker.setLatLng([lat, lon]);
+      map.setView([lat, lon], 16);
+    }
+  }
+
+  function onError(err) {
+    const btn = document.getElementById('btn-locate');
+    btn.classList.remove('loading', 'active');
+    document.getElementById('btn-text').textContent = 'Ver minha localização';
+
+    const info = document.getElementById('info');
+    info.className = 'error';
+    switch(err.code) {
+      case 1: info.textContent = 'Permissão negada. Habilite o GPS nas configurações.'; break;
+      case 2: info.textContent = 'GPS indisponível no momento. Tente novamente.'; break;
+      case 3: info.textContent = 'Tempo esgotado. Tente em área aberta.'; break;
+      default: info.textContent = 'Erro ao obter localização.';
+    }
+  }
+</script>
+</body>
+</html>
