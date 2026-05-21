@@ -376,14 +376,29 @@
     const bar = document.getElementById('offline-bar');
     if (isOnline()) {
       bar.classList.remove('visible');
-      sincronizarPendentes(true); // tenta sincronizar em segundo plano
+
     } else {
       bar.classList.add('visible');
     }
   }
 
-  window.addEventListener('online',  atualizarStatusOffline);
-  window.addEventListener('offline', atualizarStatusOffline);
+  // Flag garante que só UM gatilho dispara a sincronização inicial
+  let sincronizacaoInicialFeita = false;
+
+  function dispararSincronizacao() {
+    if (sincronizacaoInicialFeita) return;
+    sincronizacaoInicialFeita = true;
+    if (idb) sincronizarPendentes(true);
+  }
+
+  window.addEventListener('online', () => {
+    document.getElementById('offline-bar').classList.remove('visible');
+    dispararSincronizacao();
+  });
+  window.addEventListener('offline', () => {
+    document.getElementById('offline-bar').classList.add('visible');
+    sincronizacaoInicialFeita = false; // permite nova sincronização quando voltar
+  });
 
   // ── Etapas ──
   let contadorEtapas = 0;
@@ -550,11 +565,18 @@
   // ── Inicialização ──
   abrirDB().then(db => {
     idb = db;
-    atualizarStatusOffline();
     atualizarBadgePendentes();
-    // Tenta sincronizar pendentes antigos ao abrir o app
-    if (isOnline()) sincronizarPendentes(false);
+    atualizarStatusOffline();
+    // A sincronização é disparada UMA única vez:
+    // pelo evento 'online' (que inclui a abertura do app quando já há internet)
+    // ou pelo evento 'online' quando a internet volta.
   }).catch(e => console.error('IndexedDB erro:', e));
+
+  // Dispara sincronização manualmente na abertura se já estiver online,
+  // mas APENAS após o IndexedDB estar pronto (evita corrida com o evento 'online')
+  window.addEventListener('load', () => {
+    if (isOnline()) dispararSincronizacao();
+  });
 </script>
 </body>
 </html>
