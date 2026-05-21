@@ -16,13 +16,12 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:        #0d1117;
-      --surface:   #161b22;
-      --accent:    #00ffe0;
-      --accent2:   #ff4d6d;
-      --text:      #e6edf3;
-      --muted:     #8b949e;
-      --radius:    16px;
+      --bg:      #0d1117;
+      --surface: #161b22;
+      --accent:  #00ffe0;
+      --accent2: #ff4d6d;
+      --text:    #e6edf3;
+      --muted:   #8b949e;
     }
 
     html, body {
@@ -33,28 +32,26 @@
       overflow: hidden;
     }
 
-    /* ── Layout ── */
     #app {
       display: flex;
       flex-direction: column;
       height: 100dvh;
+      padding-bottom: 48px;
     }
 
-    /* ── Hero panel ── */
+    /* Hero */
     #hero {
       flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 28px;
+      gap: 24px;
       padding: 32px 24px;
       position: relative;
       transition: flex 0.55s cubic-bezier(0.77,0,0.18,1);
     }
     #hero.shrink { flex: 0 0 200px; }
-
-    /* background grid */
     #hero::before {
       content: '';
       position: absolute; inset: 0;
@@ -84,7 +81,7 @@
       text-align: center;
     }
 
-    /* ── Button ── */
+    /* Botão GPS */
     #btn-locate {
       position: relative;
       display: flex;
@@ -102,7 +99,7 @@
       border-radius: 999px;
       cursor: pointer;
       overflow: hidden;
-      transition: color .3s, background .3s, transform .15s, box-shadow .3s;
+      transition: color .3s, transform .15s, box-shadow .3s;
       box-shadow: 0 0 24px rgba(0,255,224,.18);
     }
     #btn-locate::before {
@@ -118,63 +115,46 @@
     #btn-locate:hover, #btn-locate.active { color: #0d1117; box-shadow: 0 0 40px rgba(0,255,224,.55); }
     #btn-locate:active { transform: scale(0.96); }
     #btn-locate > * { position: relative; z-index: 1; }
-
     .btn-icon { width: 22px; height: 22px; }
 
-    /* ── Info bar ── */
     #info {
       font-size: .7rem;
       color: var(--muted);
       letter-spacing: 1px;
       text-align: center;
-      min-height: 20px;
+      min-height: 36px;
       padding: 0 16px;
+      line-height: 1.6;
     }
     #info.error { color: var(--accent2); }
+    #info.success { color: var(--accent); }
 
-    /* ── Map panel ── */
+    /* Mapa */
     #map-panel {
       flex: 0 0 0;
       overflow: hidden;
       transition: flex 0.55s cubic-bezier(0.77,0,0.18,1);
       border-top: 2px solid rgba(0,255,224,.2);
     }
-    #map-panel.open {
-      flex: 1 1 0;
-    }
-    #map {
-      width: 100%;
-      height: 100%;
-    }
-
-    /* ── Leaflet overrides ── */
+    #map-panel.open { flex: 1 1 0; }
+    #map { width: 100%; height: 100%; }
     .leaflet-container { background: #0d1117; }
     .leaflet-tile { filter: brightness(.85) saturate(.6) hue-rotate(170deg); }
 
-    /* custom pulse marker */
-    .pulse-wrapper {
-      position: relative;
-      width: 24px;
-      height: 24px;
-    }
+    /* Marcador pulsante */
+    .pulse-wrapper { position: relative; width: 24px; height: 24px; }
     .pulse-dot {
-      position: absolute;
-      top: 50%; left: 50%;
+      position: absolute; top: 50%; left: 50%;
       transform: translate(-50%,-50%);
       width: 14px; height: 14px;
-      background: var(--accent);
-      border-radius: 50%;
-      border: 2px solid #fff;
-      box-shadow: 0 0 10px var(--accent);
-      z-index: 2;
+      background: var(--accent); border-radius: 50%;
+      border: 2px solid #fff; box-shadow: 0 0 10px var(--accent); z-index: 2;
     }
     .pulse-ring {
-      position: absolute;
-      top: 50%; left: 50%;
+      position: absolute; top: 50%; left: 50%;
       transform: translate(-50%,-50%);
       width: 14px; height: 14px;
-      border: 2px solid var(--accent);
-      border-radius: 50%;
+      border: 2px solid var(--accent); border-radius: 50%;
       animation: pulse-out 1.8s ease-out infinite;
     }
     @keyframes pulse-out {
@@ -182,37 +162,93 @@
       100% { width:56px; height:56px; opacity:0; }
     }
 
-    /* loading spinner inside button */
+    /* Spinner */
     .spinner {
-      display: none;
-      width: 20px; height: 20px;
-      border: 2px solid currentColor;
-      border-top-color: transparent;
-      border-radius: 50%;
-      animation: spin .8s linear infinite;
+      display: none; width: 20px; height: 20px;
+      border: 2px solid currentColor; border-top-color: transparent;
+      border-radius: 50%; animation: spin .8s linear infinite;
     }
     .loading .spinner { display: block; }
     .loading .btn-icon { display: none; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* coords chip */
+    /* Chip coordenadas */
     #coords {
-      display: none;
-      font-size: .65rem;
+      display: none; font-size: .65rem;
       background: rgba(0,255,224,.1);
       border: 1px solid rgba(0,255,224,.3);
-      color: var(--accent);
-      padding: 6px 14px;
-      border-radius: 999px;
-      letter-spacing: 1px;
+      color: var(--accent); padding: 6px 14px;
+      border-radius: 999px; letter-spacing: 1px;
     }
     #coords.visible { display: inline-block; }
+
+    /* Status do envio ao banco */
+    #db-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .62rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: opacity .4s;
+      min-height: 20px;
+    }
+    #db-status.visible { opacity: 1; }
+    #db-status .dot {
+      width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+    }
+    #db-status.sending { color: var(--muted); }
+    #db-status.sending .dot { background: var(--muted); animation: spin .8s linear infinite; border-radius: 0; width: 8px; height: 8px; border: 1.5px solid var(--muted); border-top-color: transparent; }
+    #db-status.ok  { color: var(--accent); }
+    #db-status.ok  .dot { background: var(--accent); }
+    #db-status.err { color: var(--accent2); }
+    #db-status.err .dot { background: var(--accent2); }
+
+    /* UUID bar */
+    #uuid-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 48px;
+      background: rgba(13,17,23,.95);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(0,255,224,.18);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 14px;
+      z-index: 9999;
+    }
+    #uuid-label {
+      font-size: .55rem; color: var(--muted);
+      letter-spacing: 2px; text-transform: uppercase;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    #uuid-value {
+      font-size: .58rem; color: var(--accent);
+      letter-spacing: .4px; flex: 1;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    #uuid-new {
+      display: none; flex-shrink: 0;
+      font-size: .5rem; background: var(--accent2); color: #fff;
+      padding: 2px 7px; border-radius: 999px;
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+    #uuid-new.visible { display: inline-block; }
+    #uuid-copy {
+      flex-shrink: 0; background: transparent;
+      border: 1px solid rgba(0,255,224,.35); color: var(--accent);
+      font-family: 'Space Mono', monospace; font-size: .58rem;
+      padding: 5px 12px; border-radius: 999px; cursor: pointer;
+      transition: background .2s, color .2s; white-space: nowrap;
+    }
+    #uuid-copy:active, #uuid-copy.copied { background: var(--accent); color: #0d1117; }
   </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- Hero -->
   <div id="hero">
     <div>
       <div id="title">Onde<br/>estou<span>?</span></div>
@@ -229,108 +265,186 @@
     </button>
 
     <div id="coords"></div>
+
+    <div id="db-status">
+      <div class="dot"></div>
+      <span id="db-msg"></span>
+    </div>
+
     <div id="info">Toque no botão para abrir o mapa</div>
   </div>
 
-  <!-- Map -->
   <div id="map-panel">
     <div id="map"></div>
   </div>
 
 </div>
 
+<div id="uuid-bar">
+  <span id="uuid-label">ID do aparelho</span>
+  <span id="uuid-value">—</span>
+  <span id="uuid-new">NOVO</span>
+  <button id="uuid-copy" onclick="copyUUID()">Copiar</button>
+</div>
+
 <script>
-  let map = null;
-  let marker = null;
-  let mapReady = false;
+  // ── Configuração Supabase ──
+  const SUPABASE_URL  = 'https://cytkqioorxseskeqmcld.supabase.co';
+  const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5dGtxaW9vcnhzZXNrZXFtY2xkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMjgzNTQsImV4cCI6MjA5NDgwNDM1NH0.d_l0XCEePcDTrfFld95pfEFolV4cHh0v4RLGAfHc85k';
+  const TABLE         = 'localizacoes';
+
+  // ── Mapa / GPS ──
+  let map = null, marker = null, mapReady = false;
 
   function locateMe() {
-    const btn = document.getElementById('btn-locate');
-    const info = document.getElementById('info');
+    const btn     = document.getElementById('btn-locate');
+    const info    = document.getElementById('info');
     const btnText = document.getElementById('btn-text');
 
     if (!navigator.geolocation) {
       info.textContent = 'GPS não disponível neste dispositivo.';
-      info.className = 'error';
-      return;
+      info.className = 'error'; return;
     }
-
-    // loading state
     btn.classList.add('loading', 'active');
     btnText.textContent = 'Obtendo GPS…';
     info.className = '';
     info.textContent = 'Aguardando permissão de localização…';
+    setDbStatus('', '');
 
-    navigator.geolocation.getCurrentPosition(
-      onSuccess,
-      onError,
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-    );
+    navigator.geolocation.getCurrentPosition(onSuccess, onError,
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
   }
 
   function onSuccess(pos) {
-    const lat = pos.coords.latitude;
-    const lon = pos.coords.longitude;
-    const acc = Math.round(pos.coords.accuracy);
+    const { latitude: lat, longitude: lon, accuracy: acc } = pos.coords;
+    const registrado_em = new Date().toISOString(); // horário do celular
 
-    // reset button
     const btn = document.getElementById('btn-locate');
-    btn.classList.remove('loading');
-    btn.classList.add('active');
+    btn.classList.remove('loading'); btn.classList.add('active');
     document.getElementById('btn-text').textContent = 'Atualizar';
 
-    // show coords chip
     const coords = document.getElementById('coords');
-    coords.textContent = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+    coords.textContent = lat.toFixed(5) + ', ' + lon.toFixed(5);
     coords.classList.add('visible');
 
-    document.getElementById('info').textContent = `Precisão: ±${acc} m`;
+    document.getElementById('info').textContent = 'Precisão: ±' + Math.round(acc) + ' m';
     document.getElementById('info').className = '';
 
-    // open map panel
+    // Abre o mapa
     document.getElementById('hero').classList.add('shrink');
-    const panel = document.getElementById('map-panel');
-    panel.classList.add('open');
-
-    // init map once
+    document.getElementById('map-panel').classList.add('open');
     if (!mapReady) {
       mapReady = true;
       setTimeout(() => {
         map = L.map('map', { zoomControl: true, attributionControl: false });
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19
-        }).addTo(map);
-
-        // custom icon
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
         const icon = L.divIcon({
           className: '',
           html: '<div class="pulse-wrapper"><div class="pulse-ring"></div><div class="pulse-dot"></div></div>',
-          iconSize: [24, 24],
-          iconAnchor: [12, 12]
+          iconSize: [24, 24], iconAnchor: [12, 12]
         });
-
         marker = L.marker([lat, lon], { icon }).addTo(map);
         map.setView([lat, lon], 16);
-      }, 380); // wait for panel transition
+      }, 380);
     } else {
-      // update position
       marker.setLatLng([lat, lon]);
       map.setView([lat, lon], 16);
     }
+
+    // Envia para o Supabase
+    sendToSupabase({ lat, lon, acc, registrado_em });
   }
 
   function onError(err) {
     const btn = document.getElementById('btn-locate');
     btn.classList.remove('loading', 'active');
     document.getElementById('btn-text').textContent = 'Ver minha localização';
-
     const info = document.getElementById('info');
     info.className = 'error';
-    switch(err.code) {
-      case 1: info.textContent = 'Permissão negada. Habilite o GPS nas configurações.'; break;
-      case 2: info.textContent = 'GPS indisponível no momento. Tente novamente.'; break;
-      case 3: info.textContent = 'Tempo esgotado. Tente em área aberta.'; break;
-      default: info.textContent = 'Erro ao obter localização.';
+    const msgs = {
+      1: 'Permissão negada. Habilite o GPS nas configurações.',
+      2: 'GPS indisponível no momento. Tente novamente.',
+      3: 'Tempo esgotado. Tente em área aberta.'
+    };
+    info.textContent = msgs[err.code] || 'Erro ao obter localização.';
+  }
+
+  // ── Supabase ──
+  async function sendToSupabase({ lat, lon, acc, registrado_em }) {
+    const uuid = document.getElementById('uuid-value').textContent;
+    setDbStatus('sending', 'Enviando para o banco…');
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type':  'application/json',
+          'apikey':        SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Prefer':        'return=minimal'
+        },
+        body: JSON.stringify({
+          uuid,
+          latitude:      lat,
+          longitude:     lon,
+          precisao:      acc,
+          registrado_em
+        })
+      });
+
+      if (res.ok) {
+        setDbStatus('ok', 'Salvo no banco ✓');
+      } else {
+        const err = await res.json().catch(() => ({}));
+        console.error('Supabase error:', err);
+        setDbStatus('err', 'Erro ao salvar: ' + (err.message || res.status));
+      }
+    } catch (e) {
+      console.error('Fetch error:', e);
+      setDbStatus('err', 'Sem conexão com o banco');
+    }
+  }
+
+  function setDbStatus(type, msg) {
+    const el = document.getElementById('db-status');
+    const msgEl = document.getElementById('db-msg');
+    el.className = type ? `visible ${type}` : '';
+    msgEl.textContent = msg;
+  }
+
+  // ── UUID por localStorage ──
+  function generateUUID() {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+  }
+
+  (function initUUID() {
+    const KEY = 'app_device_uuid';
+    const isNew = !localStorage.getItem(KEY);
+    if (isNew) localStorage.setItem(KEY, generateUUID());
+    const uuid = localStorage.getItem(KEY);
+    document.getElementById('uuid-value').textContent = uuid;
+    if (isNew) document.getElementById('uuid-new').classList.add('visible');
+  })();
+
+  function copyUUID() {
+    const btn = document.getElementById('uuid-copy');
+    const val = document.getElementById('uuid-value').textContent;
+    const done = () => {
+      btn.textContent = 'Copiado!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(val).then(done).catch(fallback);
+    } else { fallback(); }
+    function fallback() {
+      const ta = document.createElement('textarea');
+      ta.value = val; ta.style.cssText = 'position:fixed;opacity:0';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta); done();
     }
   }
 </script>
