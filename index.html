@@ -20,193 +20,103 @@
       --surface: #161b22;
       --accent:  #00ffe0;
       --accent2: #ff4d6d;
+      --accent3: #f0a500;
       --text:    #e6edf3;
       --muted:   #8b949e;
     }
 
-    html, body {
-      height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Space Mono', monospace;
-      overflow: hidden;
-    }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Space Mono', monospace; overflow: hidden; }
 
-    #app {
-      display: flex;
-      flex-direction: column;
-      height: 100dvh;
-      padding-bottom: 48px;
-    }
+    #app { display: flex; flex-direction: column; height: 100dvh; padding-bottom: 48px; }
 
     /* Hero */
     #hero {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 18px;
-      padding: 24px 20px;
-      position: relative;
-      overflow-y: auto;
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 16px; padding: 20px 20px;
+      position: relative; overflow-y: auto;
       transition: flex 0.55s cubic-bezier(0.77,0,0.18,1);
     }
     #hero.shrink { flex: 0 0 auto; overflow-y: auto; }
     #hero::before {
-      content: '';
-      position: absolute; inset: 0;
-      background-image:
-        linear-gradient(rgba(0,255,224,.06) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,255,224,.06) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
+      content: ''; position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(0,255,224,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,224,.06) 1px, transparent 1px);
+      background-size: 40px 40px; pointer-events: none;
     }
 
-    #title {
-      font-family: 'Syne', sans-serif;
-      font-size: clamp(1.4rem, 7vw, 2.2rem);
-      font-weight: 800;
-      letter-spacing: -1px;
-      color: var(--text);
-      text-align: center;
-      line-height: 1.1;
-    }
+    #title { font-family: 'Syne', sans-serif; font-size: clamp(1.4rem, 7vw, 2.2rem); font-weight: 800; letter-spacing: -1px; color: var(--text); text-align: center; line-height: 1.1; }
     #title span { color: var(--accent); }
+    #subtitle { font-size: .72rem; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; text-align: center; }
 
-    #subtitle {
-      font-size: .72rem;
-      color: var(--muted);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      text-align: center;
+    /* ── Barra de status offline ── */
+    #offline-bar {
+      display: none; width: 100%; max-width: 400px;
+      background: rgba(240,165,0,.12); border: 1px solid rgba(240,165,0,.4);
+      border-radius: 10px; padding: 10px 14px;
+      align-items: center; gap: 10px;
+      position: relative; z-index: 1;
     }
+    #offline-bar.visible { display: flex; }
+    #offline-icon { font-size: 1rem; flex-shrink: 0; }
+    #offline-text { font-size: .62rem; color: var(--accent3); letter-spacing: .5px; line-height: 1.5; flex: 1; }
+    #offline-text strong { display: block; }
 
-    /* ── Seção de etapas ── */
-    #etapas-section {
-      width: 100%;
-      max-width: 400px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      position: relative;
-      z-index: 1;
+    /* Badge de pendentes na uuid-bar */
+    #pending-badge {
+      display: none; flex-shrink: 0;
+      font-size: .52rem; font-weight: 700;
+      background: var(--accent3); color: #0d1117;
+      padding: 2px 8px; border-radius: 999px;
+      letter-spacing: .5px;
     }
+    #pending-badge.visible { display: inline-block; }
 
-    #etapas-label {
-      font-size: .62rem;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 2px;
-    }
-
-    .etapa-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
+    /* Etapas */
+    #etapas-section { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 8px; position: relative; z-index: 1; }
+    #etapas-label { font-size: .62rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+    .etapa-row { display: flex; align-items: center; gap: 8px; }
     .etapa-select {
-      flex: 1;
-      background: var(--surface);
-      border: 1px solid rgba(0,255,224,.3);
-      color: var(--text);
-      font-family: 'Space Mono', monospace;
-      font-size: .72rem;
-      padding: 10px 12px;
-      border-radius: 10px;
-      cursor: pointer;
-      outline: none;
-      appearance: none;
-      -webkit-appearance: none;
+      flex: 1; background: var(--surface); border: 1px solid rgba(0,255,224,.3);
+      color: var(--text); font-family: 'Space Mono', monospace; font-size: .72rem;
+      padding: 10px 12px; border-radius: 10px; cursor: pointer; outline: none;
+      appearance: none; -webkit-appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b949e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 10px center;
-      padding-right: 30px;
-      transition: border-color .2s;
+      background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; transition: border-color .2s;
     }
     .etapa-select:focus { border-color: var(--accent); }
     .etapa-select.invalid { border-color: var(--accent2); }
     .etapa-select option { background: #1c2128; color: var(--text); }
-
-    /* Botão remover etapa */
     .btn-remove-etapa {
-      width: 32px; height: 32px;
-      border-radius: 50%;
-      background: transparent;
-      border: 1px solid rgba(255,77,109,.4);
-      color: var(--accent2);
-      font-size: 1.1rem;
-      line-height: 1;
-      cursor: pointer;
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      transition: background .2s;
+      width: 32px; height: 32px; border-radius: 50%; background: transparent;
+      border: 1px solid rgba(255,77,109,.4); color: var(--accent2);
+      font-size: 1.1rem; cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; transition: background .2s;
     }
     .btn-remove-etapa:active { background: rgba(255,77,109,.15); }
-
-    /* Botão adicionar etapa */
     #btn-add-etapa {
-      align-self: flex-start;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: transparent;
-      border: 1px dashed rgba(0,255,224,.35);
-      color: var(--accent);
-      font-family: 'Space Mono', monospace;
-      font-size: .62rem;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      padding: 7px 14px;
-      border-radius: 999px;
-      cursor: pointer;
-      transition: border-color .2s, background .2s;
-      position: relative; z-index: 1;
+      align-self: flex-start; display: flex; align-items: center; gap: 6px;
+      background: transparent; border: 1px dashed rgba(0,255,224,.35); color: var(--accent);
+      font-family: 'Space Mono', monospace; font-size: .62rem; letter-spacing: 1px;
+      text-transform: uppercase; padding: 7px 14px; border-radius: 999px; cursor: pointer;
+      transition: border-color .2s, background .2s; position: relative; z-index: 1;
     }
     #btn-add-etapa:active { background: rgba(0,255,224,.08); }
-
-    /* Erro validação */
-    #etapa-erro {
-      font-size: .6rem;
-      color: var(--accent2);
-      letter-spacing: 1px;
-      min-height: 14px;
-      display: none;
-    }
+    #etapa-erro { font-size: .6rem; color: var(--accent2); letter-spacing: 1px; min-height: 14px; display: none; }
     #etapa-erro.visible { display: block; }
 
     /* Botão GPS */
     #btn-locate {
-      position: relative;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: transparent;
-      border: 2px solid var(--accent);
-      color: var(--accent);
-      font-family: 'Space Mono', monospace;
-      font-size: .85rem;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      padding: 16px 32px;
-      border-radius: 999px;
-      cursor: pointer;
-      overflow: hidden;
+      position: relative; display: flex; align-items: center; gap: 12px;
+      background: transparent; border: 2px solid var(--accent); color: var(--accent);
+      font-family: 'Space Mono', monospace; font-size: .85rem; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase; padding: 16px 32px;
+      border-radius: 999px; cursor: pointer; overflow: hidden;
       transition: color .3s, transform .15s, box-shadow .3s;
-      box-shadow: 0 0 24px rgba(0,255,224,.18);
-      position: relative; z-index: 1;
+      box-shadow: 0 0 24px rgba(0,255,224,.18); z-index: 1;
     }
     #btn-locate::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: var(--accent);
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform .35s cubic-bezier(0.77,0,0.18,1);
-      z-index: 0;
+      content: ''; position: absolute; inset: 0; background: var(--accent);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform .35s cubic-bezier(0.77,0,0.18,1); z-index: 0;
     }
     #btn-locate:hover::before, #btn-locate.active::before { transform: scaleX(1); }
     #btn-locate:hover, #btn-locate.active { color: #0d1117; box-shadow: 0 0 40px rgba(0,255,224,.55); }
@@ -214,25 +124,11 @@
     #btn-locate > * { position: relative; z-index: 1; }
     .btn-icon { width: 20px; height: 20px; }
 
-    #info {
-      font-size: .68rem;
-      color: var(--muted);
-      letter-spacing: 1px;
-      text-align: center;
-      min-height: 32px;
-      padding: 0 16px;
-      line-height: 1.6;
-      position: relative; z-index: 1;
-    }
+    #info { font-size: .68rem; color: var(--muted); letter-spacing: 1px; text-align: center; min-height: 32px; padding: 0 16px; line-height: 1.6; position: relative; z-index: 1; }
     #info.error { color: var(--accent2); }
 
     /* Mapa */
-    #map-panel {
-      flex: 0 0 0;
-      overflow: hidden;
-      transition: flex 0.55s cubic-bezier(0.77,0,0.18,1);
-      border-top: 2px solid rgba(0,255,224,.2);
-    }
+    #map-panel { flex: 0 0 0; overflow: hidden; transition: flex 0.55s cubic-bezier(0.77,0,0.18,1); border-top: 2px solid rgba(0,255,224,.2); }
     #map-panel.open { flex: 1 1 0; min-height: 200px; }
     #map { width: 100%; height: 100%; }
     .leaflet-container { background: #0d1117; }
@@ -240,74 +136,42 @@
 
     /* Marcador pulsante */
     .pulse-wrapper { position: relative; width: 24px; height: 24px; }
-    .pulse-dot {
-      position: absolute; top: 50%; left: 50%;
-      transform: translate(-50%,-50%);
-      width: 14px; height: 14px;
-      background: var(--accent); border-radius: 50%;
-      border: 2px solid #fff; box-shadow: 0 0 10px var(--accent); z-index: 2;
-    }
-    .pulse-ring {
-      position: absolute; top: 50%; left: 50%;
-      transform: translate(-50%,-50%);
-      width: 14px; height: 14px;
-      border: 2px solid var(--accent); border-radius: 50%;
-      animation: pulse-out 1.8s ease-out infinite;
-    }
-    @keyframes pulse-out {
-      0%   { width:14px; height:14px; opacity:.9; }
-      100% { width:56px; height:56px; opacity:0; }
-    }
+    .pulse-dot { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 14px; height: 14px; background: var(--accent); border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 10px var(--accent); z-index: 2; }
+    .pulse-ring { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 14px; height: 14px; border: 2px solid var(--accent); border-radius: 50%; animation: pulse-out 1.8s ease-out infinite; }
+    @keyframes pulse-out { 0% { width:14px; height:14px; opacity:.9; } 100% { width:56px; height:56px; opacity:0; } }
 
     /* Spinner */
-    .spinner {
-      display: none; width: 18px; height: 18px;
-      border: 2px solid currentColor; border-top-color: transparent;
-      border-radius: 50%; animation: spin .8s linear infinite;
-    }
+    .spinner { display: none; width: 18px; height: 18px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; }
     .loading .spinner { display: block; }
     .loading .btn-icon { display: none; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* Chip coordenadas */
-    #coords {
-      display: none; font-size: .62rem;
-      background: rgba(0,255,224,.1);
-      border: 1px solid rgba(0,255,224,.3);
-      color: var(--accent); padding: 5px 12px;
-      border-radius: 999px; letter-spacing: 1px;
-      position: relative; z-index: 1;
-    }
+    #coords { display: none; font-size: .62rem; background: rgba(0,255,224,.1); border: 1px solid rgba(0,255,224,.3); color: var(--accent); padding: 5px 12px; border-radius: 999px; letter-spacing: 1px; position: relative; z-index: 1; }
     #coords.visible { display: inline-block; }
 
     /* Status banco */
-    #db-status {
-      display: flex; align-items: center; gap: 8px;
-      font-size: .6rem; letter-spacing: 1px; text-transform: uppercase;
-      opacity: 0; transition: opacity .4s; min-height: 18px;
-      position: relative; z-index: 1;
-    }
+    #db-status { display: flex; align-items: center; gap: 8px; font-size: .6rem; letter-spacing: 1px; text-transform: uppercase; opacity: 0; transition: opacity .4s; min-height: 18px; position: relative; z-index: 1; }
     #db-status.visible { opacity: 1; }
     #db-status .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
     #db-status.sending { color: var(--muted); }
     #db-status.sending .dot { background: transparent; border: 1.5px solid var(--muted); border-top-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; }
-    #db-status.ok  { color: var(--accent); }
-    #db-status.ok  .dot { background: var(--accent); }
-    #db-status.err { color: var(--accent2); }
-    #db-status.err .dot { background: var(--accent2); }
+    #db-status.ok   { color: var(--accent); }
+    #db-status.ok   .dot { background: var(--accent); }
+    #db-status.saved { color: var(--accent3); }
+    #db-status.saved .dot { background: var(--accent3); }
+    #db-status.err  { color: var(--accent2); }
+    #db-status.err  .dot { background: var(--accent2); }
+    #db-status.syncing { color: var(--accent3); }
+    #db-status.syncing .dot { background: transparent; border: 1.5px solid var(--accent3); border-top-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; }
 
     /* UUID bar */
-    #uuid-bar {
-      position: fixed; bottom: 0; left: 0; right: 0; height: 48px;
-      background: rgba(13,17,23,.95); backdrop-filter: blur(12px);
-      border-top: 1px solid rgba(0,255,224,.18);
-      display: flex; align-items: center; gap: 10px; padding: 0 14px; z-index: 9999;
-    }
+    #uuid-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 48px; background: rgba(13,17,23,.95); backdrop-filter: blur(12px); border-top: 1px solid rgba(0,255,224,.18); display: flex; align-items: center; gap: 8px; padding: 0 14px; z-index: 9999; }
     #uuid-label { font-size: .55rem; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; }
     #uuid-value { font-size: .58rem; color: var(--accent); letter-spacing: .4px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     #uuid-new { display: none; flex-shrink: 0; font-size: .5rem; background: var(--accent2); color: #fff; padding: 2px 7px; border-radius: 999px; letter-spacing: 1px; text-transform: uppercase; }
     #uuid-new.visible { display: inline-block; }
-    #uuid-copy { flex-shrink: 0; background: transparent; border: 1px solid rgba(0,255,224,.35); color: var(--accent); font-family: 'Space Mono', monospace; font-size: .58rem; padding: 5px 12px; border-radius: 999px; cursor: pointer; transition: background .2s, color .2s; white-space: nowrap; }
+    #uuid-copy { flex-shrink: 0; background: transparent; border: 1px solid rgba(0,255,224,.35); color: var(--accent); font-family: 'Space Mono', monospace; font-size: .58rem; padding: 5px 10px; border-radius: 999px; cursor: pointer; transition: background .2s, color .2s; white-space: nowrap; }
     #uuid-copy:active, #uuid-copy.copied { background: var(--accent); color: #0d1117; }
   </style>
 </head>
@@ -320,19 +184,23 @@
       <div id="subtitle" style="margin-top:6px">GPS · Mapa ao vivo</div>
     </div>
 
-    <!-- Seleção de etapas -->
+    <!-- Barra offline -->
+    <div id="offline-bar">
+      <span id="offline-icon">📡</span>
+      <div id="offline-text">
+        <strong>Sem conexão</strong>
+        Os dados serão salvos localmente e enviados automaticamente quando a internet voltar.
+      </div>
+    </div>
+
+    <!-- Etapas -->
     <div id="etapas-section">
       <div id="etapas-label">Etapa(s) — obrigatório selecionar ao menos uma</div>
-
-      <div id="etapas-lista">
-        <!-- primeira linha gerada pelo JS -->
-      </div>
-
+      <div id="etapas-lista"></div>
       <button id="btn-add-etapa" onclick="adicionarEtapa()">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Adicionar etapa
       </button>
-
       <div id="etapa-erro">Selecione ao menos uma etapa antes de continuar.</div>
     </div>
 
@@ -362,29 +230,160 @@
 </div>
 
 <div id="uuid-bar">
-  <span id="uuid-label">ID do aparelho</span>
+  <span id="uuid-label">ID</span>
   <span id="uuid-value">—</span>
   <span id="uuid-new">NOVO</span>
+  <span id="pending-badge"></span>
   <button id="uuid-copy" onclick="copyUUID()">Copiar</button>
 </div>
 
 <script>
-  // ── Configuração Supabase ──
+  // ── Config ──
   const SUPABASE_URL = 'https://cytkqioorxseskeqmcld.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5dGtxaW9vcnhzZXNrZXFtY2xkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMjgzNTQsImV4cCI6MjA5NDgwNDM1NH0.d_l0XCEePcDTrfFld95pfEFolV4cHh0v4RLGAfHc85k';
   const TABLE        = 'localizacoes';
+  const DB_NAME      = 'gps_app';
+  const STORE_NAME   = 'pendentes';
 
   const ETAPAS_OPCOES = [
-    'Busca ativa 1',
-    'Busca ativa 2',
-    'Busca ativa 3',
-    'Pré-diagnóstico',
-    'Assinatura do termo',
-    'Questionário EBIA',
-    'Questionário de diagnóstico',
-    'Elaboração de PDF',
-    'Acompanhamento de PDF'
+    'Busca ativa 1','Busca ativa 2','Busca ativa 3',
+    'Pré-diagnóstico','Assinatura do termo','Questionário EBIA',
+    'Questionário de diagnóstico','Elaboração de PDF','Acompanhamento de PDF'
   ];
+
+  // ── IndexedDB ──
+  let idb = null;
+
+  function abrirDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = e => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME, { keyPath: 'local_id', autoIncrement: true });
+        }
+      };
+      req.onsuccess = e => resolve(e.target.result);
+      req.onerror   = e => reject(e.target.error);
+    });
+  }
+
+  function salvarPendente(registro) {
+    return new Promise((resolve, reject) => {
+      const tx = idb.transaction(STORE_NAME, 'readwrite');
+      const req = tx.objectStore(STORE_NAME).add(registro);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror   = e => reject(e.target.error);
+    });
+  }
+
+  function listarPendentes() {
+    return new Promise((resolve, reject) => {
+      const tx = idb.transaction(STORE_NAME, 'readonly');
+      const req = tx.objectStore(STORE_NAME).getAll();
+      req.onsuccess = () => resolve(req.result);
+      req.onerror   = e => reject(e.target.error);
+    });
+  }
+
+  function removerPendente(local_id) {
+    return new Promise((resolve, reject) => {
+      const tx = idb.transaction(STORE_NAME, 'readwrite');
+      const req = tx.objectStore(STORE_NAME).delete(local_id);
+      req.onsuccess = () => resolve();
+      req.onerror   = e => reject(e.target.error);
+    });
+  }
+
+  async function contarPendentes() {
+    return new Promise((resolve, reject) => {
+      const tx = idb.transaction(STORE_NAME, 'readonly');
+      const req = tx.objectStore(STORE_NAME).count();
+      req.onsuccess = () => resolve(req.result);
+      req.onerror   = e => reject(e.target.error);
+    });
+  }
+
+  async function atualizarBadgePendentes() {
+    const n = await contarPendentes();
+    const badge = document.getElementById('pending-badge');
+    if (n > 0) {
+      badge.textContent = n + ' pendente' + (n > 1 ? 's' : '');
+      badge.classList.add('visible');
+    } else {
+      badge.classList.remove('visible');
+    }
+  }
+
+  // ── Envio ao Supabase ──
+  async function enviarRegistro(registro) {
+    const { local_id, ...dados } = registro;
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'apikey':        SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Prefer':        'return=minimal'
+      },
+      body: JSON.stringify(dados)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || res.status);
+    }
+  }
+
+  // Tenta sincronizar todos os pendentes
+  let sincronizando = false;
+  async function sincronizarPendentes(silencioso) {
+    if (sincronizando) return;
+    const pendentes = await listarPendentes();
+    if (pendentes.length === 0) return;
+
+    sincronizando = true;
+    if (!silencioso) setDbStatus('syncing', `Sincronizando ${pendentes.length} registro(s)…`);
+
+    let enviados = 0;
+    for (const reg of pendentes) {
+      try {
+        await enviarRegistro(reg);
+        await removerPendente(reg.local_id);
+        enviados++;
+      } catch(e) {
+        // para no primeiro erro de rede
+        break;
+      }
+    }
+
+    sincronizando = false;
+    await atualizarBadgePendentes();
+    const restantes = await contarPendentes();
+
+    if (!silencioso) {
+      if (restantes === 0) {
+        setDbStatus('ok', `${enviados} registro(s) sincronizado(s) ✓`);
+      } else {
+        setDbStatus('saved', `${enviados} enviados · ${restantes} ainda pendente(s)`);
+      }
+    }
+  }
+
+  // ── Detecção de conexão ──
+  function isOnline() { return navigator.onLine; }
+
+  function atualizarStatusOffline() {
+    const bar = document.getElementById('offline-bar');
+    if (isOnline()) {
+      bar.classList.remove('visible');
+      sincronizarPendentes(true); // tenta sincronizar em segundo plano
+    } else {
+      bar.classList.add('visible');
+    }
+  }
+
+  window.addEventListener('online',  atualizarStatusOffline);
+  window.addEventListener('offline', atualizarStatusOffline);
 
   // ── Etapas ──
   let contadorEtapas = 0;
@@ -393,102 +392,70 @@
     const id = 'etapa-' + (++contadorEtapas);
     const row = document.createElement('div');
     row.className = 'etapa-row';
-    row.dataset.id = id;
-
     const sel = document.createElement('select');
-    sel.className = 'etapa-select';
-    sel.id = id;
-
-    const placeholder = document.createElement('option');
-    placeholder.value = '';
-    placeholder.textContent = obrigatorio ? 'Selecione uma etapa…' : 'Selecione (opcional)';
-    placeholder.disabled = true;
-    placeholder.selected = true;
-    sel.appendChild(placeholder);
-
+    sel.className = 'etapa-select'; sel.id = id;
+    const ph = document.createElement('option');
+    ph.value = ''; ph.textContent = obrigatorio ? 'Selecione uma etapa…' : 'Selecione (opcional)';
+    ph.disabled = true; ph.selected = true;
+    sel.appendChild(ph);
     ETAPAS_OPCOES.forEach(op => {
       const opt = document.createElement('option');
-      opt.value = op; opt.textContent = op;
-      sel.appendChild(opt);
+      opt.value = op; opt.textContent = op; sel.appendChild(opt);
     });
-
     sel.addEventListener('change', () => {
       sel.classList.remove('invalid');
       document.getElementById('etapa-erro').classList.remove('visible');
     });
-
     row.appendChild(sel);
-
-    // Botão remover (não aparece na primeira linha)
     if (!obrigatorio) {
       const btnRem = document.createElement('button');
-      btnRem.className = 'btn-remove-etapa';
-      btnRem.innerHTML = '&times;';
-      btnRem.title = 'Remover etapa';
-      btnRem.onclick = () => row.remove();
-      row.appendChild(btnRem);
+      btnRem.className = 'btn-remove-etapa'; btnRem.innerHTML = '&times;';
+      btnRem.onclick = () => row.remove(); row.appendChild(btnRem);
     }
-
     return row;
   }
 
-  function adicionarEtapa() {
-    document.getElementById('etapas-lista').appendChild(criarSelectEtapa(false));
-  }
+  function adicionarEtapa() { document.getElementById('etapas-lista').appendChild(criarSelectEtapa(false)); }
 
   function getEtapasSelecionadas() {
-    const selects = document.querySelectorAll('.etapa-select');
-    const valores = [];
-    selects.forEach(sel => {
-      if (sel.value) valores.push(sel.value);
-    });
-    return valores;
+    return [...document.querySelectorAll('.etapa-select')].filter(s => s.value).map(s => s.value);
   }
 
   function validarEtapas() {
-    const primeiroSelect = document.querySelector('.etapa-select');
-    if (!primeiroSelect || !primeiroSelect.value) {
-      primeiroSelect && primeiroSelect.classList.add('invalid');
+    const primeiro = document.querySelector('.etapa-select');
+    if (!primeiro || !primeiro.value) {
+      primeiro && primeiro.classList.add('invalid');
       document.getElementById('etapa-erro').classList.add('visible');
       return false;
     }
     return true;
   }
 
-  // Inicializa com a primeira linha obrigatória
   document.getElementById('etapas-lista').appendChild(criarSelectEtapa(true));
 
-  // ── Mapa / GPS ──
+  // ── GPS ──
   let map = null, marker = null, mapReady = false;
 
   function locateMe() {
     if (!validarEtapas()) return;
-
-    const btn     = document.getElementById('btn-locate');
-    const info    = document.getElementById('info');
-    const btnText = document.getElementById('btn-text');
-
-    if (!navigator.geolocation) {
-      info.textContent = 'GPS não disponível neste dispositivo.';
-      info.className = 'error'; return;
-    }
-
+    const btn = document.getElementById('btn-locate');
+    const info = document.getElementById('info');
+    if (!navigator.geolocation) { info.textContent = 'GPS não disponível.'; info.className = 'error'; return; }
     btn.classList.add('loading', 'active');
-    btnText.textContent = 'Obtendo GPS…';
-    info.className = '';
-    info.textContent = 'Aguardando permissão de localização…';
+    document.getElementById('btn-text').textContent = 'Obtendo GPS…';
+    info.className = ''; info.textContent = 'Aguardando permissão de localização…';
     setDbStatus('', '');
-
     navigator.geolocation.getCurrentPosition(onSuccess, onError,
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
   }
 
-  function onSuccess(pos) {
+  async function onSuccess(pos) {
     const { latitude: lat, longitude: lon, accuracy: acc } = pos.coords;
     const now = new Date();
     const brt = new Date(now.getTime() - 3 * 60 * 60 * 1000);
     const registrado_em = brt.toISOString().replace('Z', '-03:00');
     const etapas = getEtapasSelecionadas();
+    const uuid = document.getElementById('uuid-value').textContent;
 
     const btn = document.getElementById('btn-locate');
     btn.classList.remove('loading'); btn.classList.add('active');
@@ -497,13 +464,11 @@
     const coords = document.getElementById('coords');
     coords.textContent = lat.toFixed(5) + ', ' + lon.toFixed(5);
     coords.classList.add('visible');
-
     document.getElementById('info').textContent = 'Precisão: ±' + Math.round(acc) + ' m';
     document.getElementById('info').className = '';
 
     document.getElementById('hero').classList.add('shrink');
     document.getElementById('map-panel').classList.add('open');
-
     if (!mapReady) {
       mapReady = true;
       setTimeout(() => {
@@ -518,11 +483,28 @@
         map.setView([lat, lon], 16);
       }, 380);
     } else {
-      marker.setLatLng([lat, lon]);
-      map.setView([lat, lon], 16);
+      marker.setLatLng([lat, lon]); map.setView([lat, lon], 16);
     }
 
-    sendToSupabase({ lat, lon, acc, registrado_em, etapas });
+    const registro = { uuid, latitude: lat, longitude: lon, precisao: acc, registrado_em, etapas };
+
+    if (isOnline()) {
+      // Tenta enviar direto; se falhar, salva localmente
+      setDbStatus('sending', 'Enviando para o banco…');
+      try {
+        await enviarRegistro(registro);
+        setDbStatus('ok', 'Salvo no banco ✓');
+      } catch(e) {
+        await salvarPendente(registro);
+        await atualizarBadgePendentes();
+        setDbStatus('saved', 'Salvo localmente · enviará quando online');
+      }
+    } else {
+      // Offline: salva no IndexedDB
+      await salvarPendente(registro);
+      await atualizarBadgePendentes();
+      setDbStatus('saved', 'Salvo localmente · enviará quando online');
+    }
   }
 
   function onError(err) {
@@ -531,64 +513,21 @@
     document.getElementById('btn-text').textContent = 'Ver minha localização';
     const info = document.getElementById('info');
     info.className = 'error';
-    const msgs = {
-      1: 'Permissão negada. Habilite o GPS nas configurações.',
-      2: 'GPS indisponível no momento. Tente novamente.',
-      3: 'Tempo esgotado. Tente em área aberta.'
-    };
+    const msgs = { 1:'Permissão negada. Habilite o GPS nas configurações.', 2:'GPS indisponível. Tente novamente.', 3:'Tempo esgotado. Tente em área aberta.' };
     info.textContent = msgs[err.code] || 'Erro ao obter localização.';
-  }
-
-  // ── Supabase ──
-  async function sendToSupabase({ lat, lon, acc, registrado_em, etapas }) {
-    const uuid = document.getElementById('uuid-value').textContent;
-    setDbStatus('sending', 'Enviando para o banco…');
-
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type':  'application/json',
-          'apikey':        SUPABASE_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_KEY,
-          'Prefer':        'return=minimal'
-        },
-        body: JSON.stringify({
-          uuid,
-          latitude:      lat,
-          longitude:     lon,
-          precisao:      acc,
-          registrado_em,
-          etapas
-        })
-      });
-
-      if (res.ok) {
-        setDbStatus('ok', 'Salvo no banco ✓');
-      } else {
-        const err = await res.json().catch(() => ({}));
-        console.error('Supabase error:', err);
-        setDbStatus('err', 'Erro ao salvar: ' + (err.message || res.status));
-      }
-    } catch (e) {
-      console.error('Fetch error:', e);
-      setDbStatus('err', 'Sem conexão com o banco');
-    }
   }
 
   function setDbStatus(type, msg) {
     const el = document.getElementById('db-status');
-    const msgEl = document.getElementById('db-msg');
     el.className = type ? `visible ${type}` : '';
-    msgEl.textContent = msg;
+    document.getElementById('db-msg').textContent = msg;
   }
 
-  // ── UUID por localStorage ──
+  // ── UUID ──
   function generateUUID() {
     if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-      const r = Math.random() * 16 | 0;
-      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+      const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
     });
   }
 
@@ -596,28 +535,26 @@
     const KEY = 'app_device_uuid';
     const isNew = !localStorage.getItem(KEY);
     if (isNew) localStorage.setItem(KEY, generateUUID());
-    const uuid = localStorage.getItem(KEY);
-    document.getElementById('uuid-value').textContent = uuid;
+    document.getElementById('uuid-value').textContent = localStorage.getItem(KEY);
     if (isNew) document.getElementById('uuid-new').classList.add('visible');
   })();
 
   function copyUUID() {
     const btn = document.getElementById('uuid-copy');
     const val = document.getElementById('uuid-value').textContent;
-    const done = () => {
-      btn.textContent = 'Copiado!'; btn.classList.add('copied');
-      setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
-    };
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(val).then(done).catch(fallback);
-    } else { fallback(); }
-    function fallback() {
-      const ta = document.createElement('textarea');
-      ta.value = val; ta.style.cssText = 'position:fixed;opacity:0';
-      document.body.appendChild(ta); ta.select();
-      document.execCommand('copy'); document.body.removeChild(ta); done();
-    }
+    const done = () => { btn.textContent = 'Copiado!'; btn.classList.add('copied'); setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000); };
+    if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(val).then(done).catch(fb); } else { fb(); }
+    function fb() { const ta = document.createElement('textarea'); ta.value = val; ta.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done(); }
   }
+
+  // ── Inicialização ──
+  abrirDB().then(db => {
+    idb = db;
+    atualizarStatusOffline();
+    atualizarBadgePendentes();
+    // Tenta sincronizar pendentes antigos ao abrir o app
+    if (isOnline()) sincronizarPendentes(false);
+  }).catch(e => console.error('IndexedDB erro:', e));
 </script>
 </body>
 </html>
