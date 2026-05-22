@@ -1,0 +1,22 @@
+{
+  "name": "Minha Localização",
+  "short_name": "FGV GPS",
+  "description": "Coleta de localização GPS para pesquisadores FGV Projetos",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "Capa_App_FGV.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "Capa_App_FGV.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
