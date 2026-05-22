@@ -100,6 +100,29 @@
       transition: border-color .2s, background .2s; position: relative; z-index: 1;
     }
     #btn-add-etapa:active { background: rgba(0,255,224,.08); }
+    /* Campo SIGMA */
+    #sigma-section { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 6px; position: relative; z-index: 1; }
+    #sigma-label { font-size: .62rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+    #sigma-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid rgba(0,255,224,.3);
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      font-size: .85rem;
+      padding: 10px 12px;
+      border-radius: 10px;
+      outline: none;
+      transition: border-color .2s;
+      -moz-appearance: textfield;
+    }
+    #sigma-input::-webkit-outer-spin-button,
+    #sigma-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    #sigma-input:focus { border-color: var(--accent); }
+    #sigma-input.invalid { border-color: var(--accent2); }
+    #sigma-erro { font-size: .6rem; color: var(--accent2); letter-spacing: 1px; min-height: 14px; display: none; }
+    #sigma-erro.visible { display: block; }
+
     #etapa-erro { font-size: .6rem; color: var(--accent2); letter-spacing: 1px; min-height: 14px; display: none; }
     #etapa-erro.visible { display: block; }
 
@@ -258,6 +281,22 @@
         <strong>Sem conexão</strong>
         Os dados serão salvos localmente e enviados automaticamente quando a internet voltar.
       </div>
+    </div>
+
+    <!-- SIGMA -->
+    <div id="sigma-section">
+      <div id="sigma-label">Número da família no SIGMA</div>
+      <input
+        id="sigma-input"
+        type="number"
+        inputmode="numeric"
+        pattern="[0-9]*"
+        placeholder="Digite o número..."
+        min="0"
+        step="1"
+        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+      />
+      <div id="sigma-erro">Informe o número da família no SIGMA.</div>
     </div>
 
     <!-- Etapas -->
@@ -540,6 +579,34 @@
     return [...document.querySelectorAll('.etapa-select')].filter(s => s.value).map(s => s.value);
   }
 
+  function validarFormulario() {
+    let ok = true;
+
+    // Valida SIGMA
+    const sigma = document.getElementById('sigma-input');
+    const sigmaVal = sigma.value.trim();
+    if (!sigmaVal || isNaN(sigmaVal) || parseInt(sigmaVal) < 0) {
+      sigma.classList.add('invalid');
+      document.getElementById('sigma-erro').classList.add('visible');
+      ok = false;
+    } else {
+      sigma.classList.remove('invalid');
+      document.getElementById('sigma-erro').classList.remove('visible');
+    }
+
+    // Valida etapas
+    const primeiro = document.querySelector('.etapa-select');
+    if (!primeiro || !primeiro.value) {
+      primeiro && primeiro.classList.add('invalid');
+      document.getElementById('etapa-erro').classList.add('visible');
+      ok = false;
+    } else {
+      document.getElementById('etapa-erro').classList.remove('visible');
+    }
+
+    return ok;
+  }
+
   function validarEtapas() {
     const primeiro = document.querySelector('.etapa-select');
     if (!primeiro || !primeiro.value) {
@@ -552,11 +619,16 @@
 
   document.getElementById('etapas-lista').appendChild(criarSelectEtapa(true));
 
+  document.getElementById('sigma-input').addEventListener('input', function() {
+    this.classList.remove('invalid');
+    document.getElementById('sigma-erro').classList.remove('visible');
+  });
+
   // ── GPS ──
   let map = null, marker = null, mapReady = false;
 
   function locateMe() {
-    if (!validarEtapas()) return;
+    if (!validarFormulario()) return;
     const btn = document.getElementById('btn-locate');
     const info = document.getElementById('info');
     if (!navigator.geolocation) { info.textContent = 'GPS não disponível.'; info.className = 'error'; return; }
@@ -605,7 +677,8 @@
       marker.setLatLng([lat, lon]); map.setView([lat, lon], 16);
     }
 
-    const registro = { uuid, latitude: lat, longitude: lon, precisao: acc, registrado_em, etapas };
+    const id_familia = parseInt(document.getElementById('sigma-input').value.trim());
+    const registro = { uuid, latitude: lat, longitude: lon, precisao: acc, registrado_em, etapas, id_familia };
 
     if (isOnline()) {
       // Tenta enviar direto; se falhar, salva localmente
