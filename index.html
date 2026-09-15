@@ -373,6 +373,54 @@
     'Questionário de diagnóstico','Elaboração de PDF','Acompanhamento de PDF'
   ];
 
+  // ── Criptografia RSA + AES híbrida ──
+  // Chave pública RSA (formato SPKI, base64), sozinha ela não permite decifrar nada, apenas cifrar.
+  const RSA_PUBLIC_KEY_B64 = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs7dFqPtfHmWOBAmwnC3SxXX6fcCQ09Us5R7LaWfJqR9K7lqE0pos/FNO9yeS+AgbpSHGeda+eiKkheIJJAp0rNll1Ck5A9UaM9o55v7hWThAS+E9eCXCfbIITilGL59eS94tqwUf2AkDtskrfVH+SBZ3E8yicfnkJ6oZDVkn1D7JMElc4rZljDxnmstJ0gXH8s6HRGi27LTHhdT4x0d9w5EBADQnWNqLfs87G5I+s3rEKSEoCRnyvNlYXvomahJtDg3HTbaW2mZpyz2n6QIV8oytra/zs2J3a/VDOAID5YLr14wVjQGjJk0bH4vFU4ORnahbpzjqwBZXGuRVQK4vmQIDAQAB"
+
+  let rsaPublicKeyCache = null;
+
+  async function importarChavePublicaRSA() {
+    if (rsaPublicKeyCache) return rsaPublicKeyCache;
+    const bin = Uint8Array.from(atob(RSA_PUBLIC_KEY_B64), c => c.charCodeAt(0));
+    rsaPublicKeyCache = await crypto.subtle.importKey(
+      'spki', bin.buffer,
+      { name: 'RSA-OAEP', hash: 'SHA-256' },
+      false, ['encrypt']
+    );
+    return rsaPublicKeyCache;
+  }
+
+  function bufToBase64(buf) {
+    return btoa(String.fromCharCode(...new Uint8Array(buf)));
+  }
+
+  // Cifra os campos sensíveis (lat, lon, id_familia) com esquema híbrido RSA + AES-256-GCM.
+  // Gera uma chave AES descartável por registro, cifra o JSON com ela,
+  // e cifra a própria chave AES com a chave pública RSA fixa do app.
+  async function cifrarDadosSensiveis(dadosSensiveis) {
+    const chaveAES = await crypto.subtle.generateKey(
+      { name: 'AES-GCM', length: 256 }, true, ['encrypt']
+    );
+
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const dadosBytes = new TextEncoder().encode(JSON.stringify(dadosSensiveis));
+    const dadosCifradosBuf = await crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv }, chaveAES, dadosBytes
+    );
+
+    const chaveAESBruta = await crypto.subtle.exportKey('raw', chaveAES);
+    const chavePublicaRSA = await importarChavePublicaRSA();
+    const chaveCifradaBuf = await crypto.subtle.encrypt(
+      { name: 'RSA-OAEP' }, chavePublicaRSA, chaveAESBruta
+    );
+
+    return {
+      dados_sensiveis: bufToBase64(dadosCifradosBuf),
+      chave_sessao:    bufToBase64(chaveCifradaBuf),
+      iv:              bufToBase64(iv)
+    };
+  }
+
   // ── IndexedDB ──
   let idb = null;
 
@@ -680,7 +728,17 @@
     }
 
     const id_familia = parseInt(document.getElementById('sigma-input').value.trim());
-    const registro = { uuid, latitude: lat, longitude: lon, precisao: acc, registrado_em, etapas, id_familia };
+
+    // Cifra os campos sensíveis (RSA + AES híbrido) ANTES de montar o registro
+    // final — assim, mesmo o registro salvo offline no IndexedDB já fica protegido.
+    setDbStatus('sending', 'Cifrando dados…');
+    const { dados_sensiveis, chave_sessao, iv } = await cifrarDadosSensiveis({
+      latitude: lat,
+      longitude: lon,
+      id_familia
+    });
+
+    const registro = { uuid, precisao: acc, registrado_em, etapas, dados_sensiveis, chave_sessao, iv };
 
     if (isOnline()) {
       // Tenta enviar direto; se falhar, salva localmente
